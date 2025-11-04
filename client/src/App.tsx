@@ -10,6 +10,7 @@ import { AttachmentsManager } from './features/attachments/components/Attachment
 import { RunEvaluations } from './features/evaluations/components/RunEvaluations'
 import { ResultsView } from './features/results/components/ResultsView'
 import { AnalyticsPage } from './features/analytics/components/AnalyticsPage'
+import { CalibrationPage } from './features/calibration/components/CalibrationPage'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/evaluate" element={<RunEvaluations />} />
             <Route path="/results" element={<ResultsView />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/calibration" element={<CalibrationPage />} />
           </Routes>
         </Layout>
         <Toaster />

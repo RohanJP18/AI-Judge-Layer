@@ -7,7 +7,8 @@ import {
   BarChart3,
   Scale,
   Paperclip,
-  LineChart
+  LineChart,
+  Target
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'Run Evaluations', href: '/evaluate', icon: Play },
   { name: 'Results', href: '/results', icon: BarChart3 },
   { name: 'Analytics', href: '/analytics', icon: LineChart },
+  { name: 'Calibration', href: '/calibration', icon: Target },
 ]
 
 export function Layout({ children }: LayoutProps) {

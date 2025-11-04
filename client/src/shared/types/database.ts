@@ -215,6 +215,135 @@ export type Database = {
           retry_count?: number
         }
       }
+      golden_set_questions: {
+        Row: {
+          id: string
+          question_id: string
+          question_text: string
+          question_type: string
+          student_answer_choice: string | null
+          student_answer_reasoning: string | null
+          ground_truth_verdict: 'pass' | 'fail' | 'inconclusive'
+          ground_truth_reasoning: string
+          created_at: string
+          metadata: unknown
+        }
+        Insert: {
+          id?: string
+          question_id: string
+          question_text: string
+          question_type: string
+          student_answer_choice?: string | null
+          student_answer_reasoning?: string | null
+          ground_truth_verdict: 'pass' | 'fail' | 'inconclusive'
+          ground_truth_reasoning: string
+          created_at?: string
+          metadata?: unknown
+        }
+        Update: {
+          id?: string
+          question_id?: string
+          question_text?: string
+          question_type?: string
+          student_answer_choice?: string | null
+          student_answer_reasoning?: string | null
+          ground_truth_verdict?: 'pass' | 'fail' | 'inconclusive'
+          ground_truth_reasoning?: string
+          created_at?: string
+          metadata?: unknown
+        }
+      }
+      calibration_runs: {
+        Row: {
+          id: string
+          judge_id: string
+          judge_name: string
+          model_name: string
+          created_at: string
+          total_questions: number
+          correct_predictions: number
+          accuracy: number
+          precision_pass: number | null
+          recall_pass: number | null
+          f1_pass: number | null
+          precision_fail: number | null
+          recall_fail: number | null
+          f1_fail: number | null
+          confusion_matrix: unknown
+          passed_threshold: boolean
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          judge_id: string
+          judge_name: string
+          model_name: string
+          created_at?: string
+          total_questions: number
+          correct_predictions: number
+          accuracy: number
+          precision_pass?: number | null
+          recall_pass?: number | null
+          f1_pass?: number | null
+          precision_fail?: number | null
+          recall_fail?: number | null
+          f1_fail?: number | null
+          confusion_matrix: unknown
+          passed_threshold?: boolean
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          judge_id?: string
+          judge_name?: string
+          model_name?: string
+          created_at?: string
+          total_questions?: number
+          correct_predictions?: number
+          accuracy?: number
+          precision_pass?: number | null
+          recall_pass?: number | null
+          f1_pass?: number | null
+          precision_fail?: number | null
+          recall_fail?: number | null
+          f1_fail?: number | null
+          confusion_matrix?: unknown
+          passed_threshold?: boolean
+          notes?: string | null
+        }
+      }
+      calibration_results: {
+        Row: {
+          id: string
+          calibration_run_id: string
+          golden_question_id: string
+          predicted_verdict: 'pass' | 'fail' | 'inconclusive'
+          predicted_reasoning: string
+          ground_truth_verdict: 'pass' | 'fail' | 'inconclusive'
+          is_correct: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          calibration_run_id: string
+          golden_question_id: string
+          predicted_verdict: 'pass' | 'fail' | 'inconclusive'
+          predicted_reasoning: string
+          ground_truth_verdict: 'pass' | 'fail' | 'inconclusive'
+          is_correct: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          calibration_run_id?: string
+          golden_question_id?: string
+          predicted_verdict?: 'pass' | 'fail' | 'inconclusive'
+          predicted_reasoning?: string
+          ground_truth_verdict?: 'pass' | 'fail' | 'inconclusive'
+          is_correct?: boolean
+          created_at?: string
+        }
+      }
     }
   }
 }

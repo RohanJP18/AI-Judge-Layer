@@ -377,21 +377,3 @@ Set them in Supabase Edge Function secrets (NOT in client .env).
 ## 📝 License
 
 MIT
-
-## 👤 Author
-
-Built for BeSimple AI Engineering Interview
-
-**Time Spent**: ~6-8 hours
-- Architecture & planning: 1 hour
-- Backend setup (Supabase, Edge Functions): 1.5 hours
-- Frontend implementation: 3 hours
-- UI polish & error handling: 1 hour
-- Documentation: 0.5 hours
-
-**Key Focus Areas**:
-- Clean, maintainable code architecture
-- Production-grade TypeScript practices
-- Comprehensive error handling
-- Professional UI/UX with loading/empty/error states
-- Real LLM integration with retry logic

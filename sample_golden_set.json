@@ -1,0 +1,94 @@
+[
+  {
+    "question_id": "golden_q1",
+    "question_text": "What is the capital of France?",
+    "question_type": "geography",
+    "student_answer_choice": "Paris",
+    "student_answer_reasoning": "Paris is the capital and largest city of France",
+    "ground_truth_verdict": "pass",
+    "ground_truth_reasoning": "Correct answer with proper reasoning"
+  },
+  {
+    "question_id": "golden_q2",
+    "question_text": "What is 2 + 2?",
+    "question_type": "math",
+    "student_answer_choice": "5",
+    "student_answer_reasoning": "I added them in my head",
+    "ground_truth_verdict": "fail",
+    "ground_truth_reasoning": "Incorrect answer - 2 + 2 equals 4, not 5"
+  },
+  {
+    "question_id": "golden_q3",
+    "question_text": "Explain photosynthesis",
+    "question_type": "biology",
+    "student_answer_choice": null,
+    "student_answer_reasoning": "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce oxygen and glucose",
+    "ground_truth_verdict": "pass",
+    "ground_truth_reasoning": "Comprehensive and accurate explanation"
+  },
+  {
+    "question_id": "golden_q4",
+    "question_text": "Who wrote Romeo and Juliet?",
+    "question_type": "literature",
+    "student_answer_choice": "Charles Dickens",
+    "student_answer_reasoning": "He was a famous English writer",
+    "ground_truth_verdict": "fail",
+    "ground_truth_reasoning": "Incorrect author - it was William Shakespeare, not Charles Dickens"
+  },
+  {
+    "question_id": "golden_q5",
+    "question_text": "What is the meaning of life?",
+    "question_type": "philosophy",
+    "student_answer_choice": "42",
+    "student_answer_reasoning": "From Hitchhiker's Guide to the Galaxy",
+    "ground_truth_verdict": "inconclusive",
+    "ground_truth_reasoning": "Humorous reference but not a serious philosophical answer - neither clearly correct nor incorrect"
+  },
+  {
+    "question_id": "golden_q6",
+    "question_text": "What is the boiling point of water at sea level?",
+    "question_type": "chemistry",
+    "student_answer_choice": "100°C or 212°F",
+    "student_answer_reasoning": "Water boils at 100 degrees Celsius at standard atmospheric pressure",
+    "ground_truth_verdict": "pass",
+    "ground_truth_reasoning": "Correct answer with both Celsius and Fahrenheit, plus correct reasoning"
+  },
+  {
+    "question_id": "golden_q7",
+    "question_text": "Name three programming languages",
+    "question_type": "computer_science",
+    "student_answer_choice": null,
+    "student_answer_reasoning": "Python, JavaScript, and Java are three widely used programming languages",
+    "ground_truth_verdict": "pass",
+    "ground_truth_reasoning": "Three valid programming languages with correct context"
+  },
+  {
+    "question_id": "golden_q8",
+    "question_text": "What is the square root of 16?",
+    "question_type": "math",
+    "student_answer_choice": "8",
+    "student_answer_reasoning": "16 divided by 2",
+    "ground_truth_verdict": "fail",
+    "ground_truth_reasoning": "Incorrect answer - the square root of 16 is 4, and the reasoning shows confusion between division and square root"
+  },
+  {
+    "question_id": "golden_q9",
+    "question_text": "Who was the first president of the United States?",
+    "question_type": "history",
+    "student_answer_choice": "George Washington",
+    "student_answer_reasoning": "He served from 1789 to 1797 as the first US president",
+    "ground_truth_verdict": "pass",
+    "ground_truth_reasoning": "Correct answer with accurate historical context"
+  },
+  {
+    "question_id": "golden_q10",
+    "question_text": "Describe quantum entanglement",
+    "question_type": "physics",
+    "student_answer_choice": null,
+    "student_answer_reasoning": "It's when things get tangled at the quantum level",
+    "ground_truth_verdict": "fail",
+    "ground_truth_reasoning": "Oversimplified and inaccurate description that misses the key concept of correlated quantum states"
+  }
+]
+
+
