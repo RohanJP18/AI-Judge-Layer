@@ -72,25 +72,84 @@ export function DataIngestion() {
         throw new Error('JSON array is empty. Please include at least one submission.')
       }
 
-      // Validate with Zod
-      const validated = SubmissionsFileSchema.parse(json)
-      setValidatedData(validated)
+      // Validate with Zod using safeParse for detailed error messages
+      const result = SubmissionsFileSchema.safeParse(json)
+      
+      if (!result.success) {
+        // Parse Zod errors into user-friendly messages
+        const errors: string[] = []
+        
+        for (const issue of result.error.issues) {
+          // Get the submission index from the path (first element should be array index)
+          const submissionIndex = issue.path[0] !== undefined && typeof issue.path[0] === 'number' 
+            ? issue.path[0] + 1 
+            : 'unknown'
+          
+          // Get the field path (everything after the array index)
+          const fieldPath = issue.path.length > 1 
+            ? issue.path.slice(1).join('.')
+            : issue.path.length === 1 && typeof issue.path[0] === 'string'
+            ? issue.path[0]
+            : 'unknown field'
+          
+          let errorMsg = ''
+          
+          // Handle different error types
+          if (issue.code === 'invalid_type') {
+            if (issue.received === 'null') {
+              errorMsg = `Submission ${submissionIndex}: Required field '${fieldPath}' is null`
+            } else if (issue.received === 'undefined') {
+              errorMsg = `Submission ${submissionIndex}: Required field '${fieldPath}' is missing`
+            } else {
+              errorMsg = `Submission ${submissionIndex}: Field '${fieldPath}' must be ${issue.expected}, got ${issue.received}`
+            }
+          } else if (issue.code === 'invalid_literal') {
+            errorMsg = `Submission ${submissionIndex}: Invalid value for '${fieldPath}'`
+          } else if (issue.code === 'too_small') {
+            const minType = issue.type === 'array' ? 'items' : issue.type === 'string' ? 'characters' : 'value'
+            errorMsg = `Submission ${submissionIndex}: Field '${fieldPath}' has too few ${minType} (minimum: ${issue.minimum})`
+          } else if (issue.code === 'too_big') {
+            const maxType = issue.type === 'array' ? 'items' : issue.type === 'string' ? 'characters' : 'value'
+            errorMsg = `Submission ${submissionIndex}: Field '${fieldPath}' has too many ${maxType} (maximum: ${issue.maximum})`
+          } else if (issue.code === 'invalid_string') {
+            errorMsg = `Submission ${submissionIndex}: Invalid format for '${fieldPath}'`
+          } else if (issue.code === 'custom') {
+            errorMsg = `Submission ${submissionIndex}: ${issue.message || 'Validation failed'} at '${fieldPath}'`
+          } else {
+            errorMsg = `Submission ${submissionIndex}: ${issue.message || 'Validation error'} at '${fieldPath}'`
+          }
+          
+          errors.push(errorMsg)
+        }
+        
+        // Show first 5 errors to avoid overwhelming the user, but indicate if there are more
+        const displayErrors = errors.slice(0, 5)
+        const errorMessage = errors.length > 5
+          ? `${displayErrors.join('\n')}\n... and ${errors.length - 5} more error(s)`
+          : errors.join('\n')
+        
+        toast({
+          title: 'Invalid file format',
+          description: errorMessage,
+          variant: 'destructive',
+          duration: 15000, // Show longer for detailed errors
+        })
+        setValidatedData(null)
+        return
+      }
 
+      setValidatedData(result.data)
       toast({
         title: 'File validated successfully',
-        description: `Found ${validated.length} submission(s) ready to import.`,
+        description: `Found ${result.data.length} submission(s) ready to import.`,
       })
     } catch (error) {
       console.error('Validation error:', error)
       
-      // Provide specific error message
+      // Handle non-Zod errors (JSON parse errors, etc.)
       let errorMessage = 'Please check your JSON file format.'
       if (error instanceof Error) {
         errorMessage = error.message
-        // Make Zod errors more readable
-        if (errorMessage.includes('Expected')) {
-          errorMessage = 'Invalid data structure. ' + errorMessage.split('\n')[0]
-        }
       }
       
       toast({

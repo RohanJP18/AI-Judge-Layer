@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase'
+import { getCurrentUserId } from '@/api/authHelpers'
 import type { Database } from '@/shared/types/database'
 
 type JudgeAssignmentRow = Database['public']['Tables']['judge_assignments']['Row']
@@ -62,9 +63,12 @@ export async function assignJudgesToQuestion(
     return []
   }
 
+  const userId = await getCurrentUserId()
+  
   const assignments = uniqueJudgeIds.map((judgeId) => ({
     question_id: questionId,
     judge_id: judgeId,
+    user_id: userId,
   }))
 
   const { data, error } = await supabase

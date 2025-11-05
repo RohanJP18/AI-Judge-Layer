@@ -7,6 +7,7 @@ import { useRunEvaluations } from '../hooks/useRunEvaluations'
 import { useSubmissions } from '@/features/ingestion/hooks/useIngestion'
 import { useJudgeAssignments } from '@/features/assignments/hooks/useAssignments'
 import { useActiveJudges } from '@/features/judges/hooks/useJudges'
+import { useEvaluationSubscription } from '../hooks/useEvaluationSubscription'
 import { EvaluationProgress } from './EvaluationProgress'
 
 export function RunEvaluations() {
@@ -21,11 +22,22 @@ export function RunEvaluations() {
   const { data: submissions } = useSubmissions()
   const { data: assignments } = useJudgeAssignments()
   const { data: activeJudges } = useActiveJudges()
+  const realTimeProgress = useEvaluationSubscription()
 
   // Calculate planned evaluations
   const plannedEvaluations = assignments?.length || 0
   const totalSubmissions = submissions?.length || 0
   const totalActiveJudges = activeJudges?.length || 0
+  const isRunning = runMutation.isPending
+
+  // Use real-time progress when running, otherwise use mutation result
+  const currentProgress = isRunning
+    ? {
+        completed: realTimeProgress.completed,
+        failed: realTimeProgress.failed,
+        planned: plannedEvaluations,
+      }
+    : result
 
   const handleRun = () => {
     setStartTime(Date.now())
@@ -44,7 +56,6 @@ export function RunEvaluations() {
     )
   }
 
-  const isRunning = runMutation.isPending
   const canRun = plannedEvaluations > 0 && totalSubmissions > 0 && totalActiveJudges > 0
 
   return (
@@ -115,12 +126,12 @@ export function RunEvaluations() {
           </div>
 
           {/* Progress/Results */}
-          {isRunning && (
+          {(isRunning || result) && currentProgress && (
             <>
               <EvaluationProgress
-                planned={plannedEvaluations}
-                completed={0}
-                failed={0}
+                planned={currentProgress.planned}
+                completed={currentProgress.completed}
+                failed={currentProgress.failed}
                 isRunning={isRunning}
                 startTime={startTime}
               />

@@ -8,9 +8,12 @@ import {
   Scale,
   Paperclip,
   LineChart,
-  Target
+  Target,
+  Settings
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
+import { UserDropdown } from '@/features/auth/components/UserDropdown'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -24,26 +27,58 @@ const navigation = [
   { name: 'Run Evaluations', href: '/evaluate', icon: Play },
   { name: 'Results', href: '/results', icon: BarChart3 },
   { name: 'Analytics', href: '/analytics', icon: LineChart },
-  { name: 'Calibration', href: '/calibration', icon: Target },
+            { name: 'Calibration', href: '/calibration', icon: Target },
+          { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
+// BeSimple Logo Component
+function BeSimpleLogo({ className }: { className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 300 300"
+      className={className}
+    >
+      {/* Tomato body */}
+      <circle cx="150" cy="170" r="80" fill="#eda436"/>
+      {/* Group for left leaf rotation */}
+      <g transform="rotate(-15, 150, 90)">
+        {/* Tomato stem */}
+        <path d="M150,90 Q115,45 124,23 Q172,40 150,90" fill="#5f8f4f"/>
+      </g>
+      {/* Group for right leaf with different rotation */}
+      <g transform="rotate(0, 150, 90)">
+        {/* Rotated leaf */}
+        <path d="M150,90 Q175,76 186,62 Q165,52 150,90" fill="#5f8f4f"/>
+      </g>
+    </svg>
+  )
+}
+
 export function Layout({ children }: LayoutProps) {
+  const { isAuthenticated } = useAuth()
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center px-4">
-          <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-primary p-2">
-              <Scale className="h-5 w-5 text-primary-foreground" />
+        <div className="container flex h-16 items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 p-1.5">
+              <BeSimpleLogo className="w-full h-full" />
             </div>
             <div>
               <h1 className="text-xl font-bold">AI Judge System</h1>
               <p className="text-xs text-muted-foreground">
-                Automated Evaluation Platform
+                Powered by BeSimple
               </p>
             </div>
           </div>
+          {isAuthenticated && (
+            <div className="flex items-center gap-4">
+              <UserDropdown />
+            </div>
+          )}
         </div>
       </header>
 

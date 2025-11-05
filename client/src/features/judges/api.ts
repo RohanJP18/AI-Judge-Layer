@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase'
+import { getCurrentUserId } from '@/api/authHelpers'
 import type { Judge, JudgeCreate, JudgeUpdate } from '@/shared/types/schemas'
 import type { Database } from '@/shared/types/database'
 
@@ -44,6 +45,8 @@ export async function fetchJudgeById(id: string): Promise<Judge> {
 
 // Create a new judge
 export async function createJudge(judge: JudgeCreate): Promise<Judge> {
+  const userId = await getCurrentUserId()
+  
   const { data, error } = await supabase
     .from('judges')
     .insert({
@@ -51,6 +54,7 @@ export async function createJudge(judge: JudgeCreate): Promise<Judge> {
       system_prompt: judge.system_prompt,
       model_name: judge.model_name,
       is_active: judge.is_active,
+      user_id: userId,
     })
     .select()
     .single()

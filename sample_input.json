@@ -20,5 +20,26 @@
         "reasoning": "Observed on a clear day."
       }
     }
+  },
+  {
+    "id": "sub_2",
+    "queueId": "queue_1",
+    "labelingTaskId": "task_2",
+    "createdAt": 1690001000000,
+    "questions": [
+      {
+        "rev": 1,
+        "data": {
+          "id": "q_template_2",
+          "questionType": "multiple_choice",
+          "questionText": "What colors are in a rainbow?"
+        }
+      }
+    ],
+    "answers": {
+      "q_template_2": {
+        "choices": ["red", "orange", "yellow", "green", "blue", "purple"]
+      }
+    }
   }
 ]

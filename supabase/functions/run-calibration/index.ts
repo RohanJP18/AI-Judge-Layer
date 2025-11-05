@@ -1,3 +1,4 @@
+/// <reference types="https://esm.sh/@deno/types/index.d.ts" />
 // Supabase Edge Function for running judge calibration against golden set
 // Tests judge accuracy against pre-evaluated questions with known correct verdicts
 
@@ -39,10 +40,11 @@ serve(async (req) => {
       throw new Error('Judge not found')
     }
 
-    // Fetch all golden set questions
+    // Fetch all golden set questions (ordered for consistency)
     const { data: goldenQuestions, error: goldenError } = await supabase
       .from('golden_set_questions')
       .select('*')
+      .order('question_id', { ascending: true })
 
     if (goldenError) throw goldenError
 
@@ -59,7 +61,7 @@ serve(async (req) => {
         const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
         return apiKey ? { type: 'anthropic', apiKey } : null
       } else if (modelName.startsWith('gemini-')) {
-        const apiKey = Deno.env.get('GEMINI_API_KEY')
+        const apiKey = Deno.env.get('GOOGLE_AI_API_KEY')
         return apiKey ? { type: 'gemini', apiKey } : null
       }
       return null
@@ -89,14 +91,28 @@ serve(async (req) => {
 
     for (const question of goldenQuestions) {
       try {
-        // Build prompt
-        const prompt = `
-Question: ${question.question_text}
-Question Type: ${question.question_type}
-
-Student's Answer:
-- Choice: ${question.student_answer_choice || 'N/A'}
-- Reasoning: ${question.student_answer_reasoning || 'N/A'}
+        // Build prompt (using judge's prompt configuration)
+        const promptParts: string[] = []
+        
+        if (judge.include_question_text !== false) {
+          promptParts.push(`Question: ${question.question_text}`)
+        }
+        
+        if (judge.include_question_type !== false) {
+          promptParts.push(`Question Type: ${question.question_type}`)
+        }
+        
+        if (judge.include_student_answer !== false) {
+          promptParts.push(`Student's Answer:`)
+          if (question.student_answer_choice) {
+            promptParts.push(`- Choice: ${question.student_answer_choice}`)
+          }
+          if (question.student_answer_reasoning) {
+            promptParts.push(`- Reasoning: ${question.student_answer_reasoning}`)
+          }
+        }
+        
+        const prompt = promptParts.join('\n\n') + `
 
 Please evaluate this answer and respond with a JSON object containing:
 {
@@ -122,7 +138,7 @@ Please evaluate this answer and respond with a JSON object containing:
                 { role: 'system', content: judge.system_prompt },
                 { role: 'user', content: prompt },
               ],
-              temperature: 0.3,
+              temperature: 0, // Deterministic for calibration
               max_tokens: 500,
             }),
           })
@@ -133,6 +149,11 @@ Please evaluate this answer and respond with a JSON object containing:
             const parsed = parseVerdict(content)
             verdict = parsed.verdict
             reasoning = parsed.reasoning
+          } else {
+            const errorText = await response.text()
+            console.error(`OpenAI API error for question ${question.question_id}:`, errorText)
+            verdict = 'inconclusive'
+            reasoning = `API Error: ${response.status} ${errorText.substring(0, 200)}`
           }
         } else if (provider.type === 'anthropic') {
           const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -147,7 +168,7 @@ Please evaluate this answer and respond with a JSON object containing:
               max_tokens: 500,
               system: judge.system_prompt,
               messages: [{ role: 'user', content: prompt }],
-              temperature: 0.3,
+              temperature: 0, // Deterministic for calibration
             }),
           })
 
@@ -157,6 +178,11 @@ Please evaluate this answer and respond with a JSON object containing:
             const parsed = parseVerdict(content)
             verdict = parsed.verdict
             reasoning = parsed.reasoning
+          } else {
+            const errorText = await response.text()
+            console.error(`Anthropic API error for question ${question.question_id}:`, errorText)
+            verdict = 'inconclusive'
+            reasoning = `API Error: ${response.status} ${errorText.substring(0, 200)}`
           }
         } else if (provider.type === 'gemini') {
           const response = await fetch(
@@ -173,7 +199,7 @@ Please evaluate this answer and respond with a JSON object containing:
                   },
                 ],
                 generationConfig: {
-                  temperature: 0.3,
+                  temperature: 0, // Deterministic for calibration
                   maxOutputTokens: 500,
                 },
               }),
@@ -186,23 +212,37 @@ Please evaluate this answer and respond with a JSON object containing:
             const parsed = parseVerdict(content)
             verdict = parsed.verdict
             reasoning = parsed.reasoning
+          } else {
+            const errorText = await response.text()
+            console.error(`Gemini API error for question ${question.question_id}:`, errorText)
+            verdict = 'inconclusive'
+            reasoning = `API Error: ${response.status} ${errorText.substring(0, 200)}`
           }
         }
 
-        const isCorrect = verdict === question.ground_truth_verdict
-        if (isCorrect) correctCount++
+        // Normalize both verdicts for comparison (ensure lowercase)
+        const normalizedPredicted = normalizeVerdict(verdict)
+        const normalizedGroundTruth = normalizeVerdict(question.ground_truth_verdict)
+        const isCorrect = normalizedPredicted === normalizedGroundTruth
+        
+        if (isCorrect) {
+          correctCount++
+        } else {
+          // Log mismatches for debugging
+          console.log(`Mismatch on question ${question.question_id}: Expected "${normalizedGroundTruth}", Got "${normalizedPredicted}"`)
+        }
 
-        // Update confusion matrix
-        const key = `${question.ground_truth_verdict}_as_${verdict}` as keyof typeof confusionMatrix
+        // Update confusion matrix (use normalized verdicts)
+        const key = `${normalizedGroundTruth}_as_${normalizedPredicted}` as keyof typeof confusionMatrix
         if (key in confusionMatrix) {
           confusionMatrix[key]++
         }
 
         results.push({
           golden_question_id: question.id,
-          predicted_verdict: verdict,
+          predicted_verdict: normalizedPredicted, // Store normalized version
           predicted_reasoning: reasoning,
-          ground_truth_verdict: question.ground_truth_verdict,
+          ground_truth_verdict: normalizedGroundTruth, // Store normalized version
           is_correct: isCorrect,
         })
       } catch (error) {
@@ -298,13 +338,18 @@ Please evaluate this answer and respond with a JSON object containing:
     )
   } catch (error) {
     console.error('Calibration error:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const statusCode = errorMessage.includes('not found') ? 404 : 
+                      errorMessage.includes('required') ? 400 : 500
+    
     return new Response(
       JSON.stringify({
         success: false,
-        error: (error as Error).message,
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : undefined,
       }),
       {
-        status: 500,
+        status: statusCode,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',

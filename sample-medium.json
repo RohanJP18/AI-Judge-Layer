@@ -1,0 +1,89 @@
+[
+    {
+      "id": "sub_empty_answer",
+      "queueId": "queue_2",
+      "labelingTaskId": "task_3",
+      "createdAt": 1690002000000,
+      "questions": [
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_template_3",
+            "questionType": "free_form",
+            "questionText": "Describe the process of photosynthesis."
+          }
+        }
+      ],
+      "answers": {
+        "q_template_3": {
+          "text": ""
+        }
+      }
+    },
+    {
+      "id": "sub_no_reasoning",
+      "queueId": "queue_2",
+      "labelingTaskId": "task_4",
+      "createdAt": 1690003000000,
+      "questions": [
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_template_4",
+            "questionType": "single_choice_with_reasoning",
+            "questionText": "Is water wet?"
+          }
+        }
+      ],
+      "answers": {
+        "q_template_4": {
+          "choice": "yes"
+        }
+      }
+    },
+    {
+      "id": "sub_multiple_questions",
+      "queueId": "queue_3",
+      "labelingTaskId": "task_5",
+      "createdAt": 1690004000000,
+      "questions": [
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_template_5",
+            "questionType": "single_choice_with_reasoning",
+            "questionText": "Is 2+2=4?"
+          }
+        },
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_template_6",
+            "questionType": "free_form",
+            "questionText": "Explain your reasoning."
+          }
+        },
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_template_7",
+            "questionType": "multiple_choice",
+            "questionText": "Which are prime numbers?"
+          }
+        }
+      ],
+      "answers": {
+        "q_template_5": {
+          "choice": "yes",
+          "reasoning": "Basic arithmetic"
+        },
+        "q_template_6": {
+          "text": "It's a fundamental mathematical fact."
+        },
+        "q_template_7": {
+          "choices": ["2", "3", "5", "7"]
+        }
+      }
+    }
+  ]
+  

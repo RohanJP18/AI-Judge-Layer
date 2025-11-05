@@ -139,7 +139,19 @@ export async function runCalibration(judgeId: string): Promise<string> {
     body: { judge_id: judgeId },
   })
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    throw new Error(error.message || 'Failed to run calibration')
+  }
+
+  // Check if the function returned an error in the response body
+  if (data && !data.success) {
+    throw new Error(data.error || 'Calibration failed')
+  }
+
+  if (!data || !data.calibration_run_id) {
+    throw new Error('Invalid response from calibration function')
+  }
+
   return data.calibration_run_id
 }
 

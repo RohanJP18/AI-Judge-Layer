@@ -1,0 +1,152 @@
+[
+    {
+      "id": 123,
+      "queueId": "queue_test",
+      "labelingTaskId": "task_100",
+      "createdAt": "2024-01-01",
+      "questions": [
+        {
+          "rev": "not_a_number",
+          "data": {
+            "id": "",
+            "questionType": "single_choice_with_reasoning",
+            "questionText": 12345
+          }
+        }
+      ],
+      "answers": {
+        "q_test": {
+          "choice": ["should", "be", "string"],
+          "reasoning": 999
+        }
+      }
+    },
+    {
+      "id": "sub_missing_fields",
+      "labelingTaskId": "task_101",
+      "createdAt": 1690000000000,
+      "questions": [
+        {
+          "data": {
+            "id": "q_no_rev",
+            "questionType": "free_form"
+          }
+        }
+      ],
+      "answers": {
+        "q_no_rev": {
+          "text": "answer here"
+        }
+      }
+    },
+    {
+      "id": "sub_nested_type_errors",
+      "queueId": "queue_test2",
+      "labelingTaskId": "task_102",
+      "createdAt": 1690000000000,
+      "questions": [
+        {
+          "rev": 1,
+          "data": null
+        }
+      ],
+      "answers": "should_be_object_not_string"
+    },
+    {
+      "id": "sub_boolean_instead_of_string",
+      "queueId": true,
+      "labelingTaskId": false,
+      "createdAt": 1690000000000,
+      "questions": [
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_bool_test",
+            "questionType": "multiple_choice",
+            "questionText": "Test question"
+          }
+        }
+      ],
+      "answers": {
+        "q_bool_test": {
+          "choices": "should_be_array_not_string"
+        }
+      }
+    },
+    {
+      "id": "sub_ultra_short_id",
+      "queueId": "",
+      "labelingTaskId": "task_103",
+      "createdAt": 1690000000000,
+      "questions": [
+        {
+          "rev": -5,
+          "data": {
+            "id": "q",
+            "questionType": "invalid_question_type_enum",
+            "questionText": ""
+          }
+        }
+      ],
+      "answers": {
+        "q": {}
+      }
+    },
+    {
+      "id": "sub_extra_long_text",
+      "queueId": "queue_test3",
+      "labelingTaskId": "task_104",
+      "createdAt": 9999999999999999,
+      "questions": [
+        {
+          "rev": 1,
+          "data": {
+            "id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "questionText": "This is an extremely long question text that goes on and on and on and should probably trigger some kind of validation error if you have maximum length constraints on your question text field. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          }
+        }
+      ],
+      "answers": {}
+    },
+    {
+      "queueId": "queue_test4",
+      "labelingTaskId": "task_105",
+      "createdAt": 1690000000000,
+      "questions": [
+        {
+          "rev": 1,
+          "data": {
+            "id": "q_no_submission_id",
+            "questionType": "single_choice_with_reasoning",
+            "questionText": "Test"
+          }
+        }
+      ],
+      "answers": {
+        "q_no_submission_id": {
+          "reasoning": "Missing choice field"
+        }
+      }
+    },
+    {
+      "id": "sub_number_overflow",
+      "queueId": "queue_test5",
+      "labelingTaskId": "task_106",
+      "createdAt": 1.7976931348623157e+308,
+      "questions": [
+        {
+          "rev": 1.5,
+          "data": {
+            "id": "q_float_rev",
+            "questionType": "free_form",
+            "questionText": "Test"
+          }
+        }
+      ],
+      "answers": {
+        "q_float_rev": {
+          "text": ""
+        }
+      }
+    }
+  ]
