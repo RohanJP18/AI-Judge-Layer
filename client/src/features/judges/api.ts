@@ -3,6 +3,7 @@ import type { Judge, JudgeCreate, JudgeUpdate } from '@/shared/types/schemas'
 import type { Database } from '@/shared/types/database'
 
 type JudgeRow = Database['public']['Tables']['judges']['Row']
+type JudgeInsert = Database['public']['Tables']['judges']['Insert']
 
 // Fetch all judges
 export async function fetchJudges(): Promise<Judge[]> {
@@ -50,15 +51,17 @@ export async function createJudge(judge: JudgeCreate): Promise<Judge> {
     throw new Error('User must be authenticated to create judges')
   }
 
+  const insertData: JudgeInsert = {
+    name: judge.name,
+    system_prompt: judge.system_prompt,
+    model_name: judge.model_name,
+    is_active: judge.is_active ?? true,
+    user_id: user.id, // Set user_id for RLS
+  }
+
   const { data, error } = await supabase
     .from('judges')
-    .insert({
-      name: judge.name,
-      system_prompt: judge.system_prompt,
-      model_name: judge.model_name,
-      is_active: judge.is_active,
-      user_id: user.id, // Set user_id for RLS
-    })
+    .insert(insertData as any)
     .select()
     .single()
 
@@ -82,6 +85,7 @@ export async function updateJudge(
 
   const { data, error } = await supabase
     .from('judges')
+    // @ts-expect-error - TypeScript type inference issue with updated Database types
     .update(updateData)
     .eq('id', id)
     .select()

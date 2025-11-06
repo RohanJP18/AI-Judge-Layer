@@ -1,7 +1,14 @@
-/// <reference types="https://esm.sh/@deno/types/index.d.ts" />
-
+// @ts-ignore - Deno URL imports work at runtime
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+// @ts-ignore - Deno URL imports work at runtime
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+
+// Declare Deno global for TypeScript
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
 const GEMINI_API_KEY = Deno.env.get('GOOGLE_AI_API_KEY')

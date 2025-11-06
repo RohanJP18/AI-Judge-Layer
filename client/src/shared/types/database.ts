@@ -107,6 +107,7 @@ export type Database = {
           include_marks: boolean
           include_question_id: boolean
           include_question_type: boolean
+          user_id: string | null
         }
         Insert: {
           id?: string
@@ -122,6 +123,7 @@ export type Database = {
           include_marks?: boolean
           include_question_id?: boolean
           include_question_type?: boolean
+          user_id: string
         }
         Update: {
           id?: string
@@ -137,6 +139,7 @@ export type Database = {
           include_marks?: boolean
           include_question_id?: boolean
           include_question_type?: boolean
+          user_id?: string | null
         }
       }
       judge_assignments: {
