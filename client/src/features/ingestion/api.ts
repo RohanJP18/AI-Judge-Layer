@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase'
+import { getCurrentUserId } from '@/api/authHelpers'
 import type { SubmissionInput } from '@/shared/types/schemas'
 import type { Database } from '@/shared/types/database'
 
@@ -55,6 +56,9 @@ export async function ingestSubmissions(
         failed++
         continue
       }
+      // Get current user ID
+      const userId = await getCurrentUserId()
+
       // Insert submission (let database generate UUID)
       const { data: submissionData, error: submissionError } = await supabase
         .from('submissions')
@@ -63,6 +67,7 @@ export async function ingestSubmissions(
           labeling_task_id: submission.labelingTaskId,
           created_at: new Date(submission.createdAt).toISOString(),
           raw_json: submission,
+          user_id: userId,
         })
         .select()
         .single()

@@ -1,8 +1,17 @@
 // Supabase Edge Function for running AI Judge evaluations
 // Deno runtime with TypeScript support
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+// @ts-ignore - Deno URL imports work at runtime
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-ignore - Deno URL imports work at runtime
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+
+// Declare Deno global for TypeScript
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 // Type definitions
 interface Question {
@@ -307,22 +316,58 @@ serve(async (req) => {
       })
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing authorization header' }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        }
+      )
+    }
 
-    // Fetch all submissions
+    // Initialize Supabase client with user's auth token (not service role)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: authHeader },
+      },
+    })
+
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        }
+      )
+    }
+
+    // Fetch all submissions for this user (RLS will filter automatically, but we're explicit)
     const { data: submissions, error: submissionsError } = await supabase
       .from('submissions')
       .select('id')
+      .eq('user_id', user.id)
 
     if (submissionsError) throw submissionsError
 
-    // Fetch all judge assignments
+    // Fetch all judge assignments for this user (RLS will filter automatically)
     const { data: assignments, error: assignmentsError } = await supabase
       .from('judge_assignments')
       .select('question_id, judge_id')
+      .eq('user_id', user.id)
 
     if (assignmentsError) throw assignmentsError
 
@@ -356,11 +401,12 @@ serve(async (req) => {
           planned++
 
           try {
-            // Fetch judge details
+            // Fetch judge details (must belong to user and be active)
             const { data: judge, error: judgeError } = await supabase
               .from('judges')
               .select('*')
               .eq('id', assignment.judge_id)
+              .eq('user_id', user.id)
               .eq('is_active', true)
               .single()
 
@@ -425,6 +471,7 @@ serve(async (req) => {
                 submission_id: submission.id,
                 question_id: question.id,
                 judge_id: judge.id,
+                user_id: user.id, // Explicitly set user_id
                 verdict: 'inconclusive',
                 reasoning: 'LLM API call failed after retries',
                 error: lastError?.message || 'Unknown error',
@@ -445,11 +492,12 @@ serve(async (req) => {
             const outputTokens = estimateTokenCount(result.rawResponse || result.reasoning)
             const estimatedCost = calculateCost(judge.model_name, inputTokens, outputTokens)
 
-            // Store evaluation result with analytics data
+            // Store evaluation result with analytics data (user_id set by RLS policy)
             const { error: insertError } = await supabase.from('evaluations').insert({
               submission_id: submission.id,
               question_id: question.id,
               judge_id: judge.id,
+              user_id: user.id, // Explicitly set user_id
               verdict: result.verdict,
               reasoning: result.reasoning,
               model_name: judge.model_name,

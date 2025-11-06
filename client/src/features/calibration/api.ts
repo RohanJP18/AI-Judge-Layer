@@ -86,17 +86,24 @@ export async function fetchGoldenQuestions(): Promise<GoldenQuestion[]> {
 export async function uploadGoldenSet(
   questions: GoldenQuestionInput[]
 ): Promise<{ success: number; failed: number; duplicates: number }> {
+  // Get current user for user_id
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('User must be authenticated to upload golden set questions')
+  }
+
   let success = 0
   let failed = 0
   let duplicates = 0
 
   for (const question of questions) {
     try {
-      // Check for duplicates
+      // Check for duplicates (within user's data)
       const { data: existing } = await supabase
         .from('golden_set_questions')
         .select('id')
         .eq('question_id', question.question_id)
+        .eq('user_id', user.id)
         .maybeSingle()
 
       if (existing) {
@@ -106,7 +113,10 @@ export async function uploadGoldenSet(
 
       const { error } = await supabase
         .from('golden_set_questions')
-        .insert(question)
+        .insert({
+          ...question,
+          user_id: user.id, // Set user_id for RLS
+        })
 
       if (error) {
         console.error('Error inserting golden question:', error)

@@ -82,6 +82,12 @@ export function FileUpload({ submissionId, questionId, onUploadComplete }: FileU
           continue
         }
 
+        // Get current user for user_id
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          throw new Error('User must be authenticated to upload attachments')
+        }
+
         // Store attachment record in database
         const { data: attachment, error: dbError } = await supabase
           .from('attachments')
@@ -92,6 +98,7 @@ export function FileUpload({ submissionId, questionId, onUploadComplete }: FileU
             file_path: filePath,
             file_type: file.type,
             file_size: file.size,
+            user_id: user.id, // Set user_id for RLS
           })
           .select()
           .single()

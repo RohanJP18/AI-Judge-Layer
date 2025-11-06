@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <!-- Tomato body - smaller -->
+  <circle cx="150" cy="170" r="80" fill="#eda436"/>
+  
+  <!-- Group for left leaf rotation -->
+  <g transform="rotate(-15, 150, 90)">
+    <!-- Tomato stem - unchanged -->
+    <path d="M150,90 Q115,45 124,23 Q172,40 150,90" fill="#5f8f4f"/>
+  </g>
+  
+  <!-- Group for right leaf with different rotation -->
+  <g transform="rotate(0, 150, 90)">
+    <!-- Rotated leaf - 30% smaller -->
+    <path d="M150,90 Q175,76 186,62 Q165,52 150,90" fill="#5f8f4f"/>
+  </g>
+</svg>
+

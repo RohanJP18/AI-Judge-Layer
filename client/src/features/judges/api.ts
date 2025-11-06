@@ -44,6 +44,12 @@ export async function fetchJudgeById(id: string): Promise<Judge> {
 
 // Create a new judge
 export async function createJudge(judge: JudgeCreate): Promise<Judge> {
+  // Get current user for user_id
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('User must be authenticated to create judges')
+  }
+
   const { data, error } = await supabase
     .from('judges')
     .insert({
@@ -51,6 +57,7 @@ export async function createJudge(judge: JudgeCreate): Promise<Judge> {
       system_prompt: judge.system_prompt,
       model_name: judge.model_name,
       is_active: judge.is_active,
+      user_id: user.id, // Set user_id for RLS
     })
     .select()
     .single()

@@ -62,9 +62,16 @@ export async function assignJudgesToQuestion(
     return []
   }
 
+  // Get current user for user_id
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('User must be authenticated to create assignments')
+  }
+
   const assignments = uniqueJudgeIds.map((judgeId) => ({
     question_id: questionId,
     judge_id: judgeId,
+    user_id: user.id, // Set user_id for RLS
   }))
 
   const { data, error } = await supabase
